@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ML Cleaner</title>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        body{
+            background:#f5f7fa;
+        }
+
+        .navbar-brand{
+            font-weight:600;
+        }
+
+        .card{
+            border-radius:12px;
+        }
+
+        .shadow-soft{
+            box-shadow:0 4px 15px rgba(0,0,0,0.08);
+        }
+    </style>
+
+</head>
+
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark px-4">
+
+    <span class="navbar-brand">ML Cleaner</span>
+
+    <div class="ms-auto">
+
+        {% if user.is_authenticated %}
+
+        <span class="text-light me-3">
+            Welcome {{ user.username }}
+        </span>
+
+        <form method="post" action="{% url 'logout' %}" class="d-inline">
+            {% csrf_token %}
+            <button class="btn btn-danger btn-sm">
+                Logout
+            </button>
+        </form>
+
+        {% endif %}
+
+    </div>
+
+</nav>
+
+<div class="container py-5">
+
+{% block content %}
+{% endblock %}
+
+</div>
+
+</body>
+</html>

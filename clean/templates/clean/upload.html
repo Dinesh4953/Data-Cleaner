@@ -1,0 +1,314 @@
+{% extends "clean/base.html" %}
+{% load static %}
+
+{% block content %}
+
+<style>
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+*{box-sizing:border-box;margin:0;padding:0;}
+
+body{
+    font-family:'Inter',sans-serif;
+    background:#0d1117 !important;
+    color:#e6edf3;
+}
+
+html{
+scroll-behavior:smooth;
+}
+
+.left{
+    background:#0d1117;
+    border-right:1px solid #21262d;
+    display:flex;
+    flex-direction:column;
+    padding:60px 52px 52px;
+    justify-content:space-between;
+}
+/* ── LEFT PANEL ── */
+.left{
+    background:#0d1117;
+    border-right:1px solid #21262d;
+    display:flex;
+    flex-direction:column;
+    padding:60px 52px 52px;
+    height:100vh;
+    overflow-y:auto;
+    scrollbar-width:none;
+}
+.left::-webkit-scrollbar{display:none;}
+
+.left-top{
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    padding-bottom:40px;
+}
+
+.brand{
+    display:flex;align-items:center;gap:10px;
+    margin-bottom:32px;
+}
+.brand-mark{
+    width:36px;height:36px;
+    background:linear-gradient(135deg,#00d26a,#00aaff);
+    border-radius:8px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:11px;font-weight:700;color:#000;letter-spacing:0.5px;
+}
+.brand-name{
+    font-size:18px;font-weight:700;color:#e6edf3;letter-spacing:-0.3px;
+}
+
+.upload-label{
+    font-size:11px;font-weight:600;color:#8b949e;
+    text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px;
+}
+.upload-title{
+    font-size:26px;font-weight:700;color:#e6edf3;
+    letter-spacing:-0.5px;line-height:1.2;margin-bottom:8px;
+}
+.upload-sub{
+    font-size:13px;color:#8b949e;line-height:1.6;margin-bottom:28px;
+}
+
+.file-zone{
+    border:1px dashed #30363d;
+    border-radius:8px;
+    padding:20px;
+    text-align:center;
+    cursor:pointer;
+    position:relative;
+    background:#161b22;
+    margin-bottom:12px;
+    transition:border-color 0.15s,background 0.15s;
+}
+.file-zone:hover,.file-zone.active{
+    border-color:#00d26a;
+    background:#0d1f17;
+}
+.file-zone input{
+    position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;
+}
+.file-zone-text{font-size:13px;color:#8b949e;}
+.file-zone-text strong{color:#00d26a;font-weight:500;}
+.file-chosen{
+    display:none;
+    font-size:12px;color:#00d26a;
+    margin-top:8px;
+    background:#0d1f17;
+    padding:6px 10px;border-radius:5px;
+    word-break:break-all;
+}
+
+.btn-upload{
+    width:100%;padding:11px;
+    background:linear-gradient(135deg,#00d26a,#00aaff);
+    border:none;border-radius:7px;
+    font-family:'Inter',sans-serif;
+    font-size:14px;font-weight:600;color:#000;
+    cursor:pointer;letter-spacing:0.2px;
+    transition:opacity 0.15s;
+}
+.btn-upload:hover{opacity:0.88;}
+
+.contact-strip{
+    padding:32px 0 20px;
+    border-top:1px solid #21262d;
+    display:flex;
+    flex-direction:column;
+}
+.contact-item{font-size:13px;color:#8b949e;}
+.contact-item a{color:#c9d1d9;text-decoration:none;}
+.contact-item a:hover{color:#00d26a;}
+.contact-item span{display:block;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#484f58;margin-bottom:3px;}
+
+.right{
+    background:#161b22;
+    display:flex;
+    flex-direction:column;
+    justify-content:flex-start;
+    padding:48px 52px;
+}
+
+.panel-label{
+    font-size:18px;
+    font-weight:700;
+    color:#e6edf3;
+    text-transform:uppercase;
+    letter-spacing:1.5px;
+    margin-bottom:18px;
+    margin-top:30px;
+    position:relative;
+}
+
+.panel-label::after{
+    content:"";
+    display:block;
+    width:40px;
+    height:3px;
+    background:#00d26a;
+    margin-top:6px;
+    border-radius:3px;
+}
+.feature-list{
+    display:flex;flex-direction:column;
+}
+.feature-item{
+    display:flex;align-items:flex-start;gap:14px;
+    padding:13px 0;
+    border-bottom:1px solid #21262d;
+}
+.feature-item:last-child{border-bottom:none;}
+
+.f-dot{
+    width:6px;height:6px;border-radius:50%;
+    background:#00d26a;margin-top:5px;flex-shrink:0;
+}
+.f-title{font-size:13px;font-weight:600;color:#e6edf3;margin-bottom:2px;}
+.f-desc{font-size:12px;color:#8b949e;line-height:1.5;}
+
+.status{
+    display:flex;align-items:center;gap:8px;
+    margin-top:24px;padding-top:20px;
+    border-top:1px solid #21262d;
+    font-size:11px;color:#484f58;
+}
+.s-dot{width:6px;height:6px;border-radius:50%;background:#00d26a;flex-shrink:0;}
+
+</style>
+
+<div class="layout">
+
+    <!-- LEFT -->
+    <div class="left">
+        <div class="left-top">
+        <div class="brand">
+            <div class="brand-mark">DC</div>
+            <div class="brand-name">DataCleaner</div>
+        </div>
+
+        <div class="upload-label">Get Started</div>
+        <div class="upload-title">Upload your CSV dataset</div>
+        <p class="upload-sub">Select a .csv file to begin cleaning, filtering, and analyzing your data.</p>
+
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="file-zone" id="dropZone">
+                <input type="file" name="file" accept=".csv" required id="fileInput">
+                <div class="file-zone-text">
+                    <strong>Click to browse</strong> or drag &amp; drop<br>
+                    <span style="font-size:11px;">.csv files only &nbsp;·&nbsp; Max 50MB</span>
+                </div>
+                <div class="file-chosen" id="fileName"></div>
+            </div>
+            <button type="submit" class="btn-upload">Upload &amp; Analyze</button>
+        </form>
+
+
+        </div>
+
+        
+
+    <!-- RIGHT -->
+    <div class="right">
+        <div class="panel-label">Features</div>
+
+        <div class="feature-list">
+            <div class="feature-item">
+                <div class="f-dot"></div>
+                <div>
+                    <div class="f-title">Data Cleaning</div>
+                    <div class="f-desc">Fill missing values, remove duplicates, fix outliers, rename or drop columns, strip spaces and special characters</div>
+                </div>
+            </div>
+            <div class="feature-item">
+                <div class="f-dot"></div>
+                <div>
+                    <div class="f-title">Preprocessing</div>
+                    <div class="f-desc">Standardize, normalize, label encode columns and fix imbalanced datasets with SMOTE oversampling</div>
+                </div>
+            </div>
+            <div class="feature-item">
+                <div class="f-dot"></div>
+                <div>
+                    <div class="f-title">Smart Filtering</div>
+                    <div class="f-desc">Multi-condition AND/OR filters with numeric ranges, categorical dropdowns, and text search</div>
+                </div>
+            </div>
+            <div class="feature-item">
+                <div class="f-dot"></div>
+                <div>
+                    <div class="f-title">Group By</div>
+                    <div class="f-desc">Group rows by any column, see counts, and expand each group to inspect rows instantly</div>
+                </div>
+            </div>
+            <div class="feature-item">
+                <div class="f-dot"></div>
+                <div>
+                    <div class="f-title">10+ Chart Types</div>
+                    <div class="f-desc">Histogram, boxplot, scatter, line, pie, donut, heatmap, bubble, 3D scatter, parallel coordinates and pair plots</div>
+                </div>
+            </div>
+            <div class="feature-item">
+                <div class="f-dot"></div>
+                <div>
+                    <div class="f-title">Dataset Info</div>
+                    <div class="f-desc">Shape, data types, missing value counts, and full numeric and categorical statistics at a glance</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="status">
+            <div class="s-dot"></div>
+            All systems operational &nbsp;·&nbsp; © 2026 DataCleaner
+        </div>
+    </div>
+
+
+    <!-- contact revealed on scroll -->
+        <div class="contact-strip">
+            <div style="font-size:10px;font-weight:600;color:#484f58;text-transform:uppercase;letter-spacing:2px;margin-bottom:20px;">
+Contact
+</div>
+            <div class="contact-item" style="margin-bottom:16px;">
+                <span>Email</span>
+                <a href="mailto:duplicate4953@gmail.com">duplicate4953@gmail.com</a>
+            </div>
+            <div class="contact-item">
+                <span>Phone / WhatsApp</span>
+                <a href="tel:+918019180070">+91 80191 80070</a>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+const input = document.getElementById('fileInput');
+const zone  = document.getElementById('dropZone');
+const label = document.getElementById('fileName');
+
+input.addEventListener('change', () => {
+    if(input.files.length){
+        label.style.display = 'block';
+        label.textContent = input.files[0].name;
+        zone.classList.add('active');
+    }
+});
+zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('active'); });
+zone.addEventListener('dragleave', () => zone.classList.remove('active'));
+zone.addEventListener('drop', e => {
+    e.preventDefault();
+    if(e.dataTransfer.files.length){
+        input.files = e.dataTransfer.files;
+        label.style.display = 'block';
+        label.textContent = e.dataTransfer.files[0].name;
+        zone.classList.add('active');
+    }
+});
+</script>
+
+{% endblock %}

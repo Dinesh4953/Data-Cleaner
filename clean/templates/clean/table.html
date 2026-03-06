@@ -1,0 +1,1256 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dataset Dashboard</title>
+    <!-- Select2 CSS -->
+    <!-- jQuery FIRST -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+<!-- Select2 CSS -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
+<!-- Select2 JS (AFTER jQuery) -->
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+<!-- Plotly -->
+<script src="https://cdn.plot.ly/plotly-2.30.0.min.js"></script>
+
+<!-- Bootstrap CSS -->
+ <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        .error-border { border: 2px solid red !important; }
+    </style>
+
+    <script>
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            let cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                let cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    </script>
+</head>
+
+<body>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<!-- ================= MENU BAR ================= -->
+<div class="d-flex gap-3 mb-4">
+    <!-- HOME BUTTON -->
+     <div class="dropdown md-4">
+        <button class="btn btn-dark dropdown-toggle"
+            onclick="showSection('tableSection')"
+            title="Home (Dataset)">
+        <i class="bi bi-house-door-fill"></i>
+        </button>
+     </div>
+    
+    <div class="dropdown md-4">
+            <button class="btn btn-dark dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                Actions
+            </button>
+            <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="#" onclick="showSection('dataSection')">Data View</a></li>
+            <li><a class="dropdown-item" href="#" onclick="showSection('infoSection')">Info About Data</a></li>
+            <li><a class="dropdown-item" href="#" onclick="showSection('cleaningSection')">Data Cleaning</a></li>
+            <li><a class="dropdown-item" href="#" onclick="showSection('preprocessSection')">Data Preprocessing</a></li>
+            <li><a class="dropdown-item" href="#" onclick="showSection('filterSection')">Filter Data</a></li>
+            <li><a class="dropdown-item" href="#" onclick="showSection('groupSection')">Group By</a></li>
+            <li><a class="dropdown-item" href="#" onclick="showSection('visualSection')">Visualization</a></li>
+
+        </ul>
+    </div>
+    <div class="dropdown md-4">
+        <button class="btn btn-dark dropdown-toggle" type="button" data-bs-toggle="dropdown">
+            Show
+        </button>
+        <ul class="dropdown-menu">
+            <li><a href="#" class="dropdown-item page-size" data-size="10">10 rows per page</a></li>
+            <li><a href="#" class="dropdown-item page-size" data-size="20">20 rows per page</a></li>
+            <li><a href="#" class="dropdown-item page-size" data-size="50">50 rows per page</a></li>
+            <li><a href="#" class="dropdown-item page-size" data-size="100">100 rows per page</a></li>
+        </ul>
+    </div>
+    <div>
+        <form method="post" action="{% url 'logout' %}" style="display:inline;">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-dark dropdown-toggle">
+        Logout
+    </button>
+</form>
+    </div>
+
+</div>
+
+
+
+<div class="container py-4">
+
+
+<h2 class="mb-4">DataSet</h2>
+
+
+
+<!-- ================= CLEANING PANEL ================= -->
+<hr>
+<div id="cleaningSection" class="dashboard-section d-none"><h4>  Cleaning Panel</h4>
+
+<div class="row mb-4">
+    <div class="col-md-3">
+        <select id="cleanColumn" class="form-select">
+            <option value="">Select Column</option>
+        </select>
+    </div>
+
+    <div class="col-md-3">
+        <select id="cleanMethod" class="form-select">
+            <option value="">Select Method</option>
+        </select>
+    </div>
+
+    <div class="col-md-3">
+        <!-- Text input -->
+            <input type="text" id="cleanValue" class="form-control d-none">
+
+            <!-- Multi-column select -->
+            <select id="cleanMultiColumn" class="form-select d-none" multiple></select>
+
+            <!-- Data type dropdown -->
+            <select id="dtypeSelect" class="form-select d-none">
+                <option value="">Select Data Type</option>
+                <option value="int">Integer</option>
+                <option value="float">Float</option>
+                <option value="datetime">Datetime</option>
+                <option value="string">String</option>
+            </select>
+    </div>
+    <div class = "col-md-3">
+        <button class="btn btn-danger" onclick="undoCleaning()">Undo Cleaning</button>
+    </div>
+    <div class="col-md-2">
+        <button class="btn btn-warning" onclick="applyCleaning()">Apply Cleaning</button>
+    </div>
+</div>
+</div>
+
+
+<!-- ================= INFO SECTION ================= -->
+<div id="infoSection" class="dashboard-section d-none">
+    <h4>Dataset Information</h4>
+    <div id="dataInfo"></div>
+</div>
+
+<!-- ================= PREPROCESS SECTION ================= -->
+<div id="preprocessSection" class="dashboard-section d-none">
+    <h4>Data Preprocessing</h4>
+
+    <!-- Column Based Preprocessing -->
+    <div class="row mb-3">
+        <div class="col-md-3">
+            <select id="preprocessColumn" class="form-select">
+                <option value="">Select Column</option>
+            </select>
+        </div>
+
+        <div class="col-md-3">
+            <select id="preprocessOperation" class="form-select">
+                <option value="">Select Operation</option>
+            </select>
+        </div>
+
+        <div class="col-md-2">
+            <button class="btn btn-primary" onclick="applyPreprocess()">Apply</button>
+        </div>
+    </div>
+
+    <hr>
+
+    <!-- SMOTE Section -->
+    <h5>Handle Imbalanced Dataset</h5>
+
+    <div class="row mb-3">
+        <div class="col-md-3">
+            <select id="targetColumn" class="form-select">
+                <option value="">Select Target Column</option>
+            </select>
+        </div>
+
+        <div class="col-md-2">
+            <button class="btn btn-warning" onclick="applySMOTE()">Apply SMOTE</button>
+        </div>
+    </div>
+
+</div>
+
+<!-- ================= GROUP SECTION ================= -->
+<div id="groupSection" class="dashboard-section d-none">
+    <h4>Group By (Coming Soon)</h4>
+
+    <div class="row mb-3">
+        <div class="col md-4">
+            <select  id="groupColumn" class="form-select">
+                <option value="">Select column</option>
+            </select>
+        </div>
+        <div class="col md-2">
+            <button class="btn btn-primary" onclick="applyGroupBy()">Apply Group By</button>
+        </div>
+    </div>
+
+    <div id="groupResult"></div>
+</div>
+
+
+<!-- ================= VISUALIZATION SECTION ================= -->
+<div id="visualSection" class="dashboard-section d-none">
+    <h4>Data Visualization</h4>
+
+    <div class="row mb-3">
+        <div class="col-md-4">
+            <label>Select Columns</label>
+           <select id="vizColumns" multiple></select>
+        </div>
+
+        <div class="col-md-4">
+            <label>Chart Type</label>
+            <select id="vizType" class="form-select"></select>
+        </div>
+
+        <div class="col-md-2">
+            <label>&nbsp;</label>
+            <button class="btn btn-primary w-100" onclick="generateChart()">Generate</button>
+        </div>
+
+    </div>
+
+    <div id="vizChart" style="width:100%; height:500px;"></div>
+</div>
+
+
+
+
+
+<!-- ================= FILTER SECTION ================= -->
+<div id="filterSection" class="dashboard-section d-none">
+
+<h4>Filtering</h4>
+
+<div id="filtersContainer">
+
+<div class="row mb-3 filter-row">
+
+    <div class="col-md-2 logic-col d-none">
+        <select class="form-select logicOperator">
+            <option value="AND">AND</option>
+            <option value="OR">OR</option>
+        </select>
+    </div>
+
+    <div class="col-md-3">
+        <select class="form-select columnSelect">
+            <option value="">Select Column:</option>
+        </select>
+    </div>
+
+    <div class="col-md-3">
+        <select class="form-select conditionSelect"></select>
+    </div>
+
+    <div class="col-md-3">
+        <select class="form-select valueDropdown d-none" multiple></select>
+        <input type="text" class="form-control valueInput d-none">
+    </div>
+
+    <div class="col-md-1">
+        <button class="btn btn-danger removeFilter d-none">X</button>
+    </div>
+
+</div>
+</div>
+
+<div class="mb-3">
+    <button class="btn btn-secondary" onclick="addFilter()">+ Add Filter</button>
+    <button class="btn btn-primary" onclick="applyFilters()">Apply Filter</button>
+    <button class="btn btn-success" onclick="getCount()">Count</button>
+</div>
+
+<h5 id="countResult" class="text-primary"></h5>
+
+</div>
+
+
+<!-- ================= TABLE SECTION ================= -->
+<div id="tableSection" class="dashboard-section">
+
+<div class="table-responsive">
+<table class="table table-bordered table-striped">
+    <thead class="table-dark">
+        <tr id="tableHead"></tr>
+    </thead>
+    <tbody id="tableBody"></tbody>
+</table>
+</div>
+
+<div class="text-center mt-3">
+    <button class="btn btn-secondary" onclick="previousPage()">Previous</button>
+    <span id="pageInfo" class="mx-3"></span>
+    <button class="btn btn-secondary" onclick="nextPage()">Next</button>
+</div>
+
+</div>
+
+<script>
+
+let currentPage = 1;
+let metadataStore = {};
+let currentFilters = [];
+let currentPageSize = 20;
+
+/* ================= INITIAL LOAD ================= */
+
+$(document).ready(function(){
+
+    $.ajax({
+        url: "/get_data/",
+        type: "POST",
+        contentType: "application/json",
+        headers: {"X-CSRFToken": getCookie("csrftoken")},
+        data: JSON.stringify({filters: [], page: 1}),
+        success: function(response){
+            metadataStore = response.metadata;
+            populateColumns(metadataStore);
+            populateCleanColumns(metadataStore);
+            populatePreprocessColumns(metadataStore);
+            addGlobalCleaningOptions();
+            populateMultiColumnDropdown(metadataStore);
+             populateGroupColumns(metadataStore);
+             populateVizColumns(metadataStore);
+
+             $("#vizColumns").select2({
+        placeholder: "Select columns",
+        allowClear: true,
+        width: "100%"
+    });
+
+
+            renderTable(response);
+            
+        }
+    });
+
+});
+
+/* ================= LOAD DATA ================= */
+
+function loadData(page){
+    currentPage = page;
+
+    $.ajax({
+        url: "/get_data/",
+        type: "POST",
+        contentType: "application/json",
+        headers: {"X-CSRFToken": getCookie("csrftoken")},
+        data: JSON.stringify({
+    filters: currentFilters,
+    page: page,
+    page_size: currentPageSize
+}),
+        success: function(response){
+            renderTable(response);
+        }
+    });
+}
+
+/* ================= APPLY FILTERS ================= */
+
+function applyFilters(page = 1){
+    currentFilters = [];
+
+    $(".filter-row").each(function(index){
+
+        let column = $(this).find(".columnSelect").val();
+        let condition = $(this).find(".conditionSelect").val();
+
+        let value;
+        if(!$(this).find(".valueDropdown").hasClass("d-none")){
+            value = $(this).find(".valueDropdown").val();
+            if(value) value = value.join(",");
+        } else {
+            value = $(this).find(".valueInput").val();
+        }
+
+        let logic = index > 0 ? $(this).find(".logicOperator").val() : "AND";
+
+        if(column && value){
+            currentFilters.push({column, condition, value, logic});
+        }
+    });
+
+    loadData(page);
+}
+
+/* ================= COUNT ================= */
+
+function getCount(){
+    applyFilters();
+
+    $.ajax({
+        url: "/get_data/",
+        type: "POST",
+        contentType: "application/json",
+        headers: {"X-CSRFToken": getCookie("csrftoken")},
+        data: JSON.stringify({filters: currentFilters, mode: "count"}),
+        success: function(response){
+            $("#countResult").text("Total Matching Rows: " + response.total_count);
+        }
+    });
+}
+
+/* ================= POPULATE COLUMNS ================= */
+/* For Filtering section columns dropdown */
+function populateColumns(metadata){   
+    $(".columnSelect").each(function(){
+        if($(this).children().length === 1){
+            Object.keys(metadata).forEach(col => {
+                $(this).append(`<option value="${col}">${col}</option>`);
+            });
+        }
+    });
+}
+/* For Cleaning section columns dropdown */
+
+function populateCleanColumns(metadata){
+    $("#cleanColumn").empty().append('<option value="">Select Column</option>');
+    Object.keys(metadata).forEach(col => {
+        $("#cleanColumn").append(`<option value="${col}">${col}</option>`);
+    });
+}
+
+/* For Cleaning section  multiple columns seelct (for remove duplicates operation) dropdown */
+
+function populateMultiColumnDropdown(metadata){
+    $("#cleanMultiColumn").empty();
+    Object.keys(metadata).forEach(col => {
+        $("#cleanMultiColumn").append(
+            `<option value="${col}">${col}</option>`
+        );
+    });
+}
+
+
+
+/* For Preprocess section columns dropdown */
+
+  function populatePreprocessColumns(metadata){
+    $("#preprocessColumn").empty().append('<option value="">Select Column</option>');
+    $("#targetColumn").empty().append('<option value="">Select Target Column</option>');
+
+    Object.keys(metadata).forEach(col => {
+        $("#preprocessColumn").append(`<option value="${col}">${col}</option>`);
+        $("#targetColumn").append(`<option value="${col}">${col}</option>`);
+    });
+}
+
+/* For Grouping section columns dropdown */
+
+function populateGroupColumns(metadata){
+    $("#groupColumn").empty().append('<option value="">Select Column</option>');
+
+    Object.keys(metadata).forEach(col => {
+        $("#groupColumn").append(`<option value="${col}">${col}</option>`);
+    });
+}
+
+/* For Visualizatoin section columns dropdown */
+
+
+function populateVizColumns(metadata){
+    $("#vizColumns").empty();
+    Object.keys(metadata).forEach(col => {
+        $("#vizColumns").append(`<option value="${col}">${col}</option>`);
+    });
+}
+
+
+/* ================= FILTER COLUMN CHANGE ================= */
+
+$(document).on("change", ".columnSelect", function(){
+    /*
+    closest() goes UP the DOM to find the nearest matching parent, 
+      while find() goes DOWN the DOM to find matching children inside an element.
+    */
+    let row = $(this).closest(".filter-row");
+    let selected = $(this).val();
+    
+    let meta = metadataStore[selected];
+    
+    let conditionSelect = row.find(".conditionSelect");
+    let valueDropdown = row.find(".valueDropdown");
+    let valueInput = row.find(".valueInput");
+
+    conditionSelect.empty();
+    valueDropdown.empty();
+
+    if(!meta) return;
+    
+
+    if(meta.type === "numeric"){
+        conditionSelect.append(`
+            <option value="gt">greater than</option>
+            <option value="lt">less than</option>
+            <option value="eq">equal</option>
+            <option value="between">between</option>
+        `);
+        valueDropdown.addClass("d-none");
+        valueInput.removeClass("d-none");
+    }
+    else if(meta.type === "categorical"){
+        conditionSelect.append(`
+            <option value="is">is</option>
+            <option value="is_not">is not</option>
+            <option value="contains">contains</option>
+            <option value="starts_with">starts with</option>
+            <option value="end_with">ends with</option>
+        `);
+        valueInput.addClass("d-none");
+        valueDropdown.removeClass("d-none");
+        meta.unique.forEach(val => {
+            valueDropdown.append(`<option value="${val}">${val}</option>`);
+        });
+    }
+    
+    else{
+        conditionSelect.append(`
+            <option value="contains">contains</option>
+            <option value="starts_with">starts with</option>
+            <option value="end_with">ends with</option>
+        `);
+        valueDropdown.addClass("d-none");
+        valueInput.removeClass("d-none");
+    }
+});
+
+/* ================= CLEANING LOGIC ================= */
+function addGlobalCleaningOptions(){
+
+    $("#cleanMethod").append(`
+        <option value="remove_column">Remove Column(s)</option>
+        <option value="rename_column">Rename Column (old:new)</option>
+        <option value="remove_constant">Remove Constant Columns</option>
+        <option value="remove_high_missing">Remove High Missing Columns</option>
+    `);
+}
+
+
+
+$("#cleanColumn").change(function(){
+
+    let col = $(this).val();
+
+    
+    $("#cleanMethod")
+        .empty()
+        .append('<option value="">Select Method</option>');
+
+    $("#cleanValue").addClass("d-none");
+
+    if(!col){
+        addGlobalCleaningOptions();
+        return;
+    }
+
+    
+    let meta = metadataStore[col];
+
+    $("#cleanMethod").empty().append('<option value="">Select Method</option>');
+    $("#cleanValue").addClass("d-none");
+
+    if(!meta) return;
+
+    if(meta.type === "numeric"){
+        $("#cleanMethod").append(`
+            <option value="fill_mean">Fill NA (Mean)</option>
+            <option value="fill_median">Fill NA (Median)</option>
+            <option value="fill_zero">Fill NA (0)</option>
+            <option value="replace">Replace (old:new)</option>
+           <option value="remove_outliers">Remove Outliers (IQR)</option>
+<option value="cap_outliers">Cap Outliers (Winsorization)</option>
+            <option value="remove_duplicates">Remove Duplicates</option>
+            <option value="drop_na">Drop NA Rows</option>
+        <option value="change_dtype">Change Data Type</option>
+        <option value="strip_spaces">Strip Spaces</option>
+        `);
+    } else {
+        $("#cleanMethod").append(`
+            <option value="fill_mode">Fill NA (Mode)</option>
+            <option value="lowercase">Lowercase</option>
+            <option value="uppercase">Uppercase</option>
+            <option value="titlecase">Title Case</option>
+            <option value="replace">Replace (old:new)</option>
+            <option value="strip_spaces">Strip Spaces</option>
+        <option value="remove_special_chars">Remove Special Characters</option>
+        <option value="drop_na">Drop NA Rows</option>
+            <option value="remove_duplicates">Remove Duplicates</option>
+        `);
+    }
+});
+
+
+
+$("#cleanMethod").change(function(){
+
+    let selected = $(this).val();
+
+    // Hide all dynamic inputs first
+    $("#cleanValue").addClass("d-none");
+    $("#cleanMultiColumn").addClass("d-none");
+    $("#dtypeSelect").addClass("d-none");
+
+    // Dataset-level methods clear column selection
+    let datasetLevelMethods = [
+        "remove_column",
+        "rename_column",
+        "remove_constant",
+        "remove_high_missing",
+        "remove_duplicates"
+    ];
+
+    if(datasetLevelMethods.includes(selected)){
+        $("#cleanColumn").val("");
+    }
+
+    // Text input methods
+    if(selected === "replace" || selected === "rename_column"){
+        $("#cleanValue")
+            .removeClass("d-none")
+            .attr("placeholder","Use format old:new");
+    }
+
+    // Multi column selection
+    else if(selected === "remove_column" || selected === "remove_duplicates"){
+        $("#cleanMultiColumn").removeClass("d-none");
+    }
+
+    // Change dtype dropdown
+    else if(selected === "change_dtype"){
+        $("#dtypeSelect").removeClass("d-none");
+    }
+
+});
+
+function applyCleaning(){
+
+    let column = $("#cleanColumn").val();
+    let method = $("#cleanMethod").val();
+    let value = null;
+
+    if(!method){
+        alert("Select method");
+        return;
+    }
+
+    // Dataset-level methods
+    let datasetLevelMethods = [
+        "remove_column",
+        "rename_column",
+        "remove_constant",
+        "remove_high_missing",
+        "remove_duplicates"
+    ];
+
+    if(!datasetLevelMethods.includes(method) && !column){
+        alert("Select column");
+        return;
+    }
+
+    // Determine value source
+    if(method === "remove_column" || method === "remove_duplicates"){
+        let selectedCols = $("#cleanMultiColumn").val();
+        if(selectedCols){
+            value = selectedCols.join(",");
+        }
+    }
+    else if(method === "change_dtype"){
+        value = $("#dtypeSelect").val();
+    }
+    else{
+        value = $("#cleanValue").val();
+    }
+
+    $.ajax({
+        url: "/clean_data/",
+        type: "POST",
+        contentType: "application/json",
+        headers: {"X-CSRFToken": getCookie("csrftoken")},
+        data: JSON.stringify({column, method, value}),
+        success: function(){
+            alert("Cleaning Applied Successfully!");
+            loadData(1);
+        }
+    });
+}
+
+function undoCleaning(){
+    $.ajax({
+        url: "/undo_cleaning/",
+        type: "POST",
+        headers: {"X-CSRFToken": getCookie("csrftoken")},
+        success: function(response){
+            if(response.status === "success"){
+                alert("Undo Successful");
+                loadData(1);
+            } else {
+                alert("Nothing to undo");
+            }
+        }
+    });
+}
+
+/* Group By section*/
+
+function applyGroupBy(){
+    let column = $("#groupColumn").val();
+    if(!column){
+        alert("Select Column");
+        return;
+    }
+    $.ajax({
+        url:"/group_data/",
+        type : "POST",
+        contentType : "application/json",
+        headers: {"X-CSRFToken": getCookie("csrftoken")},
+        data : JSON.stringify({column: column}),
+        success: function(response){
+            renderGroupResult(response);
+        }
+    })
+}
+
+
+function renderGroupResult(response){
+
+    let html = "";
+
+    response.groups.forEach(group => {
+
+        html += `
+            <div class="group-wrapper">
+
+                <div class="group-item py-2 px-3 border-bottom d-flex align-items-center"
+                     style="cursor:pointer"
+                     data-column="${response.column}"
+                     data-value="${group.name}">
+                     
+                    <span class="arrow me-2">▶</span>
+                    <strong>${response.column}: ${group.name}</strong> 
+                    (${group.count})
+                </div>
+
+                <div class="group-table-container d-none"></div>
+
+            </div>
+        `;
+    });
+
+    $("#groupResult").html(html);
+}
+
+/* Group Section Modify */
+$(document).on("click", ".group-item", function(){
+
+    let arrow = $(this).find(".arrow");
+    let column = $(this).data("column");
+    let value = $(this).data("value");
+    let tableContainer = $(this).next(".group-table-container");
+
+    $(".arrow").not(arrow).removeClass("open").html("▶");
+    $(".group-table-container").not(tableContainer).addClass("d-none").empty();
+
+    if(!arrow.hasClass("open")){
+
+        arrow.html("▼");
+        arrow.addClass("open");
+
+        loadGroupRows(column, value, tableContainer);
+
+    } else {
+
+        arrow.html("▶");
+        arrow.removeClass("open");
+        tableContainer.addClass("d-none").empty();
+    }
+
+});
+
+function loadGroupRows(column, groupValue, container){
+
+    $.ajax({
+        url: "/group_data/",
+        type: "POST",
+        contentType: "application/json",
+        headers: {"X-CSRFToken": getCookie("csrftoken")},
+        data: JSON.stringify({
+            column: column,
+            group_value: groupValue
+        }),
+        success: function(response){
+
+            let tableHtml = buildTableHtml(response);
+
+            container.html(tableHtml);
+            container.removeClass("d-none");
+        }
+    });
+}
+
+function buildTableHtml(response){
+
+    let columns = response.columns;
+    let data = response.data;
+
+    let html = `
+        <div class="table-responsive mt-2">
+        <table class="table table-bordered table-striped">
+        <thead class="table-dark"><tr>
+    `;
+
+    columns.forEach(col => {
+        html += `<th>${col}</th>`;
+    });
+
+    html += `</tr></thead><tbody>`;
+
+    data.forEach(row => {
+        html += "<tr>";
+        columns.forEach(col => {
+            html += `<td>${row[col] ?? ""}</td>`;
+        });
+        html += "</tr>";
+    });
+
+    html += "</tbody></table></div>";
+
+    return html;
+}
+
+
+
+/* ShowBy section */
+
+$(document).on("click", ".page-size", function(e){
+
+    e.preventDefault();  // 👈 IMPORTANT
+
+    let size = parseInt($(this).data("size"));
+
+    currentPageSize = size;
+    currentPage = 1;
+
+    loadData(1);
+});
+
+/* ================= VISUALIZATION SECTION ================= */
+
+$("#vizColumns").change(function(){
+
+    let selected = $(this).val();
+    let vizType = $("#vizType");
+
+    vizType.empty();
+
+    if(!selected || selected.length === 0){
+    vizType.append(`
+        <option value="pairplot">Pair Plot (All Numeric Columns)</option>
+    `);
+    return;
+}
+
+    let types = selected.map(col => metadataStore[col].type);
+    let uniqueTypes = [...new Set(types)];
+
+    /* 1col */
+    if(selected.length === 1){
+
+        if(uniqueTypes[0] === "numeric"){
+            vizType.append(`
+                <option value="histogram">Histogram</option>
+                <option value="boxplot">Boxplot</option>
+                <option value="violin">Violin</option>
+            `);
+        }
+        else{
+            vizType.append(`
+                <option value="bar">Bar</option>
+                <option value="pie">Pie</option>
+                <option value="donut">Donut</option>
+            `);
+        }
+    }
+
+    /*2 cols */
+    else if(selected.length === 2){
+
+        if(uniqueTypes.length === 1 && uniqueTypes[0] === "numeric"){
+            vizType.append(`
+                <option value="scatter">Scatter</option>
+                <option value="line">Line</option>
+                <option value="area">Area</option>
+            `);
+        }
+        else{
+            vizType.append(`
+                <option value="bar">Grouped Bar</option>
+                <option value="heatmap">Heatmap</option>
+            `);
+        }
+    }
+
+    /* 3 cols */
+    else if(selected.length === 3){
+        vizType.append(`
+            <option value="bubble">Bubble</option>
+            <option value="3d">3D Scatter</option>
+        `);
+    }
+    /* >=4 cols*/
+    else if(selected.length >= 4){
+
+    if(uniqueTypes.length === 1 && uniqueTypes[0] === "numeric"){
+        vizType.append(`
+            <option value="parallel">Parallel Coordinates</option>
+        `);
+    }
+}
+
+});
+
+
+
+function generateChart(){
+
+    let columns = $("#vizColumns").val();
+    let chartType = $("#vizType").val();
+
+    if(!columns || !chartType){
+        alert("Select columns and chart type");
+        return;
+    }
+
+    $.ajax({
+        url: "/visualize_data/",
+        type: "POST",
+        contentType: "application/json",
+        headers: {"X-CSRFToken": getCookie("csrftoken")},
+        data: JSON.stringify({
+            columns: columns,
+            chart_type: chartType
+        }),
+       success: function(response){
+
+    console.log(response);  // check browser console
+
+    Plotly.newPlot("vizChart", response.data, response.layout);
+
+}
+    });
+}
+
+/* ================= PAGINATION ================= */
+
+function nextPage(){ loadData(currentPage + 1); }
+function previousPage(){ if(currentPage > 1) loadData(currentPage - 1); }
+
+/* ================= TABLE RENDER ================= */
+
+function renderTable(response){
+
+    let data = response.data;
+    let columns = response.columns;
+
+    $("#tableHead").empty();
+    columns.forEach(col => {
+        $("#tableHead").append("<th>" + col + "</th>");
+    });
+
+    $("#tableBody").empty();
+
+    data.forEach(row => {
+        let rowHtml = "<tr>";
+        columns.forEach(col => {
+            rowHtml += "<td>" + (row[col] ?? "") + "</td>";
+        });
+        rowHtml += "</tr>";
+        $("#tableBody").append(rowHtml);
+    });
+
+    $("#pageInfo").text("Page " + response.current_page + " of " + response.total_pages);
+    $("button[onclick='nextPage()']").prop("disabled", !response.has_next);
+$("button[onclick='previousPage()']").prop("disabled", !response.has_previous);
+}
+
+function addFilter(){
+
+    let firstRow = $(".filter-row").first();
+    let newRow = firstRow.clone();
+
+    // Clear values
+    newRow.find(".columnSelect").val("");
+    newRow.find(".conditionSelect").empty();
+    newRow.find(".valueInput").val("").addClass("d-none");
+    newRow.find(".valueDropdown").empty().addClass("d-none");
+
+    // Show logic operator and remove button
+    newRow.find(".logic-col").removeClass("d-none");
+    newRow.find(".removeFilter").removeClass("d-none");
+
+    $("#filtersContainer").append(newRow);
+
+    populateColumns(metadataStore);
+}
+
+$(document).on("click", ".removeFilter", function(){
+    $(this).closest(".filter-row").remove();
+});
+
+
+
+
+function showSection(sectionId){
+
+    $(".dashboard-section").addClass("d-none");
+
+    if(sectionId === "dataSection"){
+        $("#filterSection").addClass("d-none");
+        $("#tableSection").removeClass("d-none");
+    }
+
+    else if(sectionId === "filterSection"){
+        $("#filterSection").removeClass("d-none");
+         $("#tableSection").removeClass("d-none");
+        // table & filter hidden initially
+    }
+
+    else if(sectionId === "groupSection"){
+        $("#groupSection").removeClass("d-none");
+        // table & filter hidden initially
+    }
+    else if(sectionId === "tableSection"){
+    $("#tableSection").removeClass("d-none");
+}
+
+    else if(sectionId === "cleaningSection"){
+        $("#cleaningSection").removeClass("d-none");
+        $("#filterSection").removeClass("d-none");
+        $("#tableSection").removeClass("d-none");
+    }
+
+    else if(sectionId === "preprocessSection"){
+        $("#preprocessSection").removeClass("d-none");
+        $("#filterSection").removeClass("d-none");
+        $("#tableSection").removeClass("d-none");
+    }
+
+    else if(sectionId === "visualSection"){
+        $("#visualSection").removeClass("d-none");
+        
+    }
+
+    else if(sectionId === "infoSection"){
+        $("#infoSection").removeClass("d-none");
+        loadDatasetInfo();
+    }
+}
+
+function applyPreprocess(){
+
+    let column = $("#preprocessColumn").val();
+    let operation = $("#preprocessOperation").val();
+    let target = $("#targetColumn").val();
+
+    if(!operation){
+        alert("Select operation");
+        return;
+    }
+
+    $.ajax({
+        url: "/preprocess_data/",
+        type: "POST",
+        contentType: "application/json",
+        headers: {"X-CSRFToken": getCookie("csrftoken")},
+        data: JSON.stringify({
+            column: column,
+            operation: operation,
+            target: target
+        }),
+        success: function(){
+            alert("Preprocessing Applied!");
+            loadData(1);
+        }
+    });
+}
+
+
+
+$("#preprocessColumn").change(function(){
+
+    let selectedCol = $(this).val();
+    let meta = metadataStore[selectedCol];
+
+    let operationDropdown = $("#preprocessOperation");
+    operationDropdown.empty().append('<option value="">Select Operation</option>');
+
+    if(!meta) return;
+
+    if(meta.type === "numeric"){
+        operationDropdown.append(`
+            <option value="standardize">Standardize</option>
+            <option value="normalize">Normalize</option>
+        `);
+    }
+    else if(meta.type === "categorical"){
+        operationDropdown.append(`
+            <option value="label_encode">Label Encode</option>
+        `);
+    }
+});
+
+function applySMOTE(){
+
+    let target = $("#targetColumn").val();
+
+    if(!target){
+        alert("Select target column");
+        return;
+    }
+
+    $.ajax({
+        url: "/preprocess_data/",
+        type: "POST",
+        contentType: "application/json",
+        headers: {"X-CSRFToken": getCookie("csrftoken")},
+        data: JSON.stringify({
+            operation: "smote",
+            target: target
+        }),
+        success: function(){
+            alert("SMOTE Applied!");
+            loadData(1);
+        }
+    });
+}
+
+
+function loadDatasetInfo(){
+    $.ajax({
+        url: "/dataset_info/",
+        type: "GET",
+        success: function(response){
+
+            if(response.error){
+                $("#dataInfo").html("<p>No data available</p>");
+                return;
+            }
+
+            let html = `
+                <h5>Dataset Shape</h5>
+                <p><strong>Rows:</strong> ${response.shape[0]}</p>
+                <p><strong>Columns:</strong> ${response.shape[1]}</p>
+
+                <hr>
+                <h5>Column Information</h5>
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Column</th>
+                            <th>Data Type</th>
+                            <th>Missing Values</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            response.columns.forEach(col => {
+                html += `
+                    <tr>
+                        <td>${col}</td>
+                        <td>${response.dtypes[col]}</td>
+                        <td>${response.missing[col]}</td>
+                    </tr>
+                `;
+            });
+
+            html += `
+                    </tbody>
+                </table>
+
+                <hr>
+                <h5>Numeric Statistics</h5>
+            `;
+
+            if(Object.keys(response.describe_numeric).length > 0){
+                html += buildDescribeTable(response.describe_numeric);
+            } else {
+                html += "<p>No numeric columns</p>";
+            }
+
+            html += `
+                <hr>
+                <h5>Categorical Statistics</h5>
+            `;
+
+            if(Object.keys(response.describe_categorical).length > 0){
+                html += buildDescribeTable(response.describe_categorical);
+            } else {
+                html += "<p>No categorical columns</p>";
+            }
+
+            $("#dataInfo").html(html);
+        }
+    });
+}
+
+function buildDescribeTable(data){
+
+    let stats = Object.keys(data);
+    let columns = Object.keys(data[stats[0]]);
+
+    let html = `
+        <table class="table table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th>Statistic</th>
+    `;
+
+    columns.forEach(col => {
+        html += `<th>${col}</th>`;
+    });
+
+    html += `</tr></thead><tbody>`;
+
+    stats.forEach(stat => {
+        html += `<tr><td><strong>${stat}</strong></td>`;
+        columns.forEach(col => {
+            html += `<td>${data[stat][col] ?? ""}</td>`;
+        });
+        html += `</tr>`;
+    });
+
+    html += `</tbody></table>`;
+
+    return html;
+}
+
+</script>
+
+</body>
+</html>
