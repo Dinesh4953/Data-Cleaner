@@ -8,3 +8,4 @@ dnspython
 certifi
 gunicorn
 python-dotenv
+whitenoise
