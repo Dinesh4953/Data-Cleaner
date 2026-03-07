@@ -133,10 +133,12 @@ MIDDLEWARE.insert(1, "whitenoise.middleware.WhiteNoiseMiddleware")
 
 import certifi
 from mongoengine import connect
-
+import os
+from dotenv import load_dotenv
+load_dotenv()
 connect(
     db="dataset_dashboard",
-    host="mongodb+srv://dinesh:IUCzwTn0JWKAXVVd@cluster0.1o1s7ip.mongodb.net/dataset_dashboard?retryWrites=true&w=majority",
+    host= os.getenv("URI"),
     tls=True,
     tlsCAFile=certifi.where()
 )

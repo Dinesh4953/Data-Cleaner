@@ -40,6 +40,25 @@
         return cookieValue;
     }
     </script>
+<style>
+
+    .dashboard-section{
+    transition: all 0.3s ease-in-out;
+}
+
+.dashboard-section .card{
+    background: linear-gradient(145deg, #1f1f1f, #2b2b2b);
+}
+
+.dashboard-section h4{
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+#dataInfo{
+    font-size: 15px;
+}
+</style>
 </head>
 
 <body>
@@ -145,9 +164,27 @@
 
 
 <!-- ================= INFO SECTION ================= -->
-<div id="infoSection" class="dashboard-section d-none">
-    <h4>Dataset Information</h4>
-    <div id="dataInfo"></div>
+<div id="infoSection" class="dashboard-section d-none mt-4">
+
+    <div class="card bg-dark text-light shadow border-secondary">
+
+        <div class="card-header bg-secondary text-white d-flex align-items-center">
+            <h5 class="mb-0">
+                <i class="bi bi-database-fill me-2"></i>
+                Dataset Information
+            </h5>
+        </div>
+
+        <div class="card-body">
+
+            <div id="dataInfo" class="p-2">
+                <!-- dataset info will be inserted here -->
+            </div>
+
+        </div>
+
+    </div>
+
 </div>
 
 <!-- ================= PREPROCESS SECTION ================= -->
@@ -1030,8 +1067,17 @@ function showSection(sectionId){
     $(".dashboard-section").addClass("d-none");
 
     if(sectionId === "dataSection"){
+        $(".dashboard-section").addClass("d-none");
+
+    $("#" + sectionId)
+        .removeClass("d-none")
+        .hide()
+        .fadeIn(200);
+
+    if(sectionId === "dataSection"){
         $("#filterSection").addClass("d-none");
         $("#tableSection").removeClass("d-none");
+    }
     }
 
     else if(sectionId === "filterSection"){

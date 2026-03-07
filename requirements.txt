@@ -6,4 +6,5 @@ plotly
 mongoengine
 dnspython
 certifi
-gunicorn 
+gunicorn
+python-dotenv
